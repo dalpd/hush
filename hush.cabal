@@ -9,29 +9,24 @@ license:             BSD3
 license-file:        LICENSE
 author:              Deniz A. Durmaz
 maintainer:          denizalpd@ogr.iu.edu.tr
--- copyright:
--- category:
+category:            Web
 build-type:          Simple
 extra-source-files:  CHANGELOG.md
 cabal-version:       >=1.10
 
 library
-  -- exposed-modules:
-  -- other-modules:
-  -- other-extensions:
-  build-depends:       base >=4.11 && <4.12
-  hs-source-dirs:      src
-  default-language:    Haskell2010
-
-executable hush
-  main-is:             Main.hs
-  -- other-modules:
-  -- other-extensions:
-  build-depends:       base >=4.11 && <4.12
-                     , curl
-                     , aeson
+  exposed-modules:     Hush.Main Hush.API Hush.Types Hush.Utils
+  build-depends:       aeson
+                     , base >=4.7 && < 5
                      , bytestring
+                     , http-client
+                     , http-client-tls
+                     , load-env
+                     , lens
+                     , servant-server >= 0.16
+                     , servant-client >= 0.16
                      , utf8-string
-                     , lens 
-  hs-source-dirs:      src
-  default-language:    Haskell2010
+                     , text
+  hs-source-dirs:     src
+  default-language:   Haskell2010
+  default-extensions: OverloadedStrings
