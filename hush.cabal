@@ -15,7 +15,7 @@ extra-source-files:  CHANGELOG.md
 cabal-version:       >=1.10
 
 library
-  exposed-modules:     Hush.Main Hush.API Hush.Types Hush.Utils
+  exposed-modules:     Hush.API Hush.Types Hush.Utils Hush.Client
   build-depends:       aeson
                      , base >=4.7 && < 5
                      , bytestring
@@ -30,3 +30,11 @@ library
   hs-source-dirs:     src
   default-language:   Haskell2010
   default-extensions: OverloadedStrings
+
+executable spacy
+      main-is:             Hush.hs
+      -- other-modules:
+      -- other-extensions:
+      build-depends:       base >=4.7 && < 5
+      hs-source-dirs:      src
+      default-language:    Haskell2010
