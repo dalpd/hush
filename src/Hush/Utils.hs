@@ -16,4 +16,3 @@ accessKey = do
   case keyMaybe of
     Just k -> pure $ pack k
     Nothing -> error "Couldn't find ACCESS_KEY"
-

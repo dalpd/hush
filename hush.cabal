@@ -23,7 +23,7 @@ library
                      , http-client-tls
                      , load-env
                      , lens
-                     , servant-server >= 0.16
+                     , servant >= 0.16
                      , servant-client >= 0.16
                      , utf8-string
                      , text

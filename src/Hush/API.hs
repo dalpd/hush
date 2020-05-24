@@ -2,7 +2,9 @@
 {-# LANGUAGE TypeOperators #-}
 
 module Hush.API
-  ( search
+  ( searchPhotos
+  , searchCollections
+  , searchUsers
   ) where
 
 ------------------------------------------------------------------------------
@@ -10,25 +12,66 @@ module Hush.API
 import           Hush.Types
 
 import qualified Data.Text as T
-import           Servant (Get, JSON, Proxy (..), QueryParam, (:>))
+import           Data.Proxy
+import           Servant.API
 import           Servant.Client (ClientM, client)
 
 ------------------------------------------------------------------------------
+-- | TODO:
+-- https://docs.servant.dev/en/stable/cookbook/structuring-apis/StructuringApis.html
 
-type UnsplashAPI = "search"
-                :> "photos"
-                :> QueryParam "query" T.Text
-                :> QueryParam "client_id" T.Text
-                :> Get '[JSON] SearchResult
+type UnsplashAPI = SearchAPI
+
+type SearchAPI =
+    "search" :>
+             ( "photos"
+             :> QueryParam "query" T.Text
+             :> QueryParam "per_page" Int
+             :> QueryParam "page" Int
+             :> QueryParam "client_id" T.Text
+             :> Get '[JSON] PhotoSearchResult
+             :<|> "collections"
+             :> QueryParam "query" T.Text
+             :> QueryParam "per_page" Int
+             :> QueryParam "page" Int
+             :> QueryParam "client_id" T.Text
+             :> Get '[JSON] CollectionSearchResult
+             :<|> "users"
+             :> QueryParam "query" T.Text
+             :> QueryParam "per_page" Int
+             :> QueryParam "page" Int
+             :> QueryParam "client_id" T.Text
+             :> Get '[JSON] UserSearchResult
+             )
 
 
 ------------------------------------------------------------------------------
-unsplashAPI :: Proxy UnsplashAPI
-unsplashAPI = Proxy
+searchAPI :: Proxy SearchAPI
+searchAPI = Proxy
+
+searchPhotos
+  :: Maybe T.Text
+  -> Maybe Int -- up to a maximum of 30 items per page
+  -> Maybe Int
+  -> Maybe T.Text
+  -> ClientM PhotoSearchResult
+
+searchCollections
+  :: Maybe T.Text
+  -> Maybe Int -- up to a maximum of 30 items per page
+  -> Maybe Int
+  -> Maybe T.Text
+  -> ClientM CollectionSearchResult
+
+searchUsers
+  :: Maybe T.Text
+  -> Maybe Int -- up to a maximum of 30 items per page
+  -> Maybe Int
+  -> Maybe T.Text
+  -> ClientM UserSearchResult
 
 
 ------------------------------------------------------------------------------
-search :: Maybe T.Text -> Maybe T.Text -> ClientM SearchResult
-search = client unsplashAPI
+(searchPhotos :<|> searchCollections :<|> searchUsers) = client searchAPI
 
 

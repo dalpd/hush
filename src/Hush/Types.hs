@@ -2,30 +2,65 @@
 {-# LANGUAGE OverloadedStrings     #-}
 
 module Hush.Types
-  ( SearchResult(..)
-  , Res(..)
+  ( PhotoSearchResult
+  , CollectionSearchResult
+  , UserSearchResult
+  , Photo
+  , User
+  , photoSearchLens
+  , resultLens
+  , urlLens
   ) where
 
 ------------------------------------------------------------------------------
 
+import           Control.Lens
 import           Data.Aeson
 
 ------------------------------------------------------------------------------
-data SearchResult = SearchResult
-  { total       :: Int
-  , total_pages :: Int
-  , results     :: [Res]
+data PhotoSearchResult = PhotoSearchResult
+  { photoSearchResult_total :: Int
+  , photoSearchResult_totalPages :: Int
+  , photoSearchResult_results :: [Photo]
   } deriving (Show)
 
-instance FromJSON SearchResult where
-  parseJSON = withObject "SearchResult" $ \o -> SearchResult
+instance FromJSON PhotoSearchResult where
+  parseJSON = withObject "PhotoSearchResult" $ \o -> PhotoSearchResult
     <$> o .: "total"
     <*> o .: "total_pages"
     <*> o .: "results"
 
 
 ------------------------------------------------------------------------------
-data Res = Res
+data CollectionSearchResult = CollectionSearchResult
+  { collectionSearchResult_total :: Int
+  , collectionSearchResult_totalPages :: Int
+  , collectionSearchResult_results :: [Collection]
+  } deriving (Show)
+
+instance FromJSON CollectionSearchResult where
+  parseJSON = withObject "CollectionSearchResult" $ \o -> CollectionSearchResult
+    <$> o .: "total"
+    <*> o .: "total_pages"
+    <*> o .: "results"
+
+
+------------------------------------------------------------------------------
+data UserSearchResult = UserSearchResult
+  { userSearchResult_total :: Int
+  , userSearchResult_totalPages :: Int
+  , userSearchResult_results :: [User]
+  } deriving (Show)
+
+instance FromJSON UserSearchResult where
+  parseJSON = withObject "UserSearchResult" $ \o -> UserSearchResult
+    <$> o .: "total"
+    <*> o .: "total_pages"
+    <*> o .: "results"
+
+
+------------------------------------------------------------------------------
+data Photo = Photo
   { id :: String
   , created_at :: String
   , updated_at :: String
@@ -36,7 +71,7 @@ data Res = Res
   , description :: Maybe String
   , alt_description :: Maybe String
   , urls  :: URLs
-  , links :: ResultLinks
+  , links :: PhotoLinks
   , categories :: [String]
   , likes  :: Int
   , liked_by_user :: Bool
@@ -46,8 +81,8 @@ data Res = Res
   , tags :: Maybe [Tag]
   } deriving (Show)
 
-instance FromJSON Res where
-  parseJSON = withObject "Res" $ \o -> Res
+instance FromJSON Photo where
+  parseJSON = withObject "Photo" $ \o -> Photo
     <$> o .: "id"
     <*> o .: "created_at"
     <*> o .: "updated_at"
@@ -69,6 +104,75 @@ instance FromJSON Res where
 
 
 ------------------------------------------------------------------------------
+data Collection = Collection
+  { id :: Int
+  , title :: String
+  , description :: Maybe String
+  , published_at :: String
+  , updated_at :: String
+  , curated :: Bool
+  , featured :: Bool
+  , total_photos :: Int
+  , private :: Bool
+  , share_key :: String
+  , tags :: Maybe [Tag] -- ?
+  , links :: CollectionLinks
+  , user :: User
+  , cover_photo :: Photo -- ?
+  , preview_photos :: Preview
+  } deriving (Show)
+
+instance FromJSON Collection where
+  parseJSON = withObject "Collection" $ \o -> Collection
+    <$> o .: "id"
+    <*> o .: "title"
+    <*> o .: "description"
+    <*> o .: "published_at"
+    <*> o .: "updated_at"
+    <*> o .: "curated"
+    <*> o .: "featured"
+    <*> o .: "total_photos"
+    <*> o .: "private"
+    <*> o .: "share_key"
+    <*> o .: "tags"
+    <*> o .: "links"
+    <*> o .: "user"
+    <*> o .: "cover_photo"
+    <*> o .: "preview_photos"
+
+
+
+------------------------------------------------------------------------------
+data CollectionLinks = CollectionLinks
+  { self :: String
+  , html :: String
+  , photos :: String
+  , related :: String
+  } deriving (Show)
+
+instance FromJSON CollectionLinks where
+  parseJSON = withObject "CollectionLinks" $ \o -> CollectionLinks
+    <$> o .: "self"
+    <*> o .: "html"
+    <*> o .: "photos"
+    <*> o .: "related"
+
+------------------------------------------------------------------------------
+data Preview = Preview
+  { id :: String
+  , created_at :: String
+  , updated_at :: String
+  , preview_urls :: URLs
+  } deriving (Show)
+
+instance FromJSON Preview where
+  parseJSON = withObject "Preview" $ \o -> Preview
+    <$> o .: "id"
+    <*> o .: "created_at"
+    <*> o .: "updated_at"
+    <*> o .: "urls"
+
+------------------------------------------------------------------------------
 data URLs = URLs
   { raw     :: String
   , full    :: String
@@ -87,15 +191,15 @@ instance FromJSON URLs where
 
 
 ------------------------------------------------------------------------------
-data ResultLinks = ResultLinks
+data PhotoLinks = PhotoLinks
   { self    :: String
   , html    :: String
   , download :: String
   , download_location :: String
   } deriving (Show)
 
-instance FromJSON ResultLinks where
-  parseJSON = withObject "ResultLinks" $ \o -> ResultLinks
+instance FromJSON PhotoLinks where
+  parseJSON = withObject "PhotoLinks" $ \o -> PhotoLinks
     <$> o .: "self"
     <*> o .: "html"
     <*> o .: "download"
@@ -121,6 +225,8 @@ data User = User
   , total_likes :: Int
   , total_photos :: Int
   , accepted_tos :: Bool
+  , followed_by_user :: Maybe Bool
+  , photos :: Maybe [Preview]
   } deriving (Show)
 
 instance FromJSON User where
@@ -142,6 +248,8 @@ instance FromJSON User where
     <*> o .: "total_likes"
     <*> o .: "total_photos"
     <*> o .: "accepted_tos"
+    <*> o .:? "followed_by_user"
+    <*> o .:? "photos"
 
 
 ------------------------------------------------------------------------------
@@ -202,7 +310,7 @@ data Source = Source
   , description :: Maybe String
   , meta_title :: Maybe String
   , meta_description :: Maybe String
-  , cover_photo :: Res
+  , cover_photo :: Photo
   } deriving (Show)
 
 instance FromJSON Source where
@@ -220,14 +328,14 @@ instance FromJSON Source where
 data Ancestry = Ancestry
   { type' :: Type
   , category :: Type
-  , subcategory :: Type
+  , subcategory :: Maybe Type
   } deriving Show
 
 instance FromJSON Ancestry where
   parseJSON = withObject "Ancestry" $ \o -> Ancestry
     <$> o .: "type"
     <*> o .: "category"
-    <*> o .: "subcategory"
+    <*> o .:? "subcategory"
 
 
 ------------------------------------------------------------------------------
@@ -240,3 +348,16 @@ instance FromJSON Type where
   parseJSON = withObject "Type" $ \o -> Type
     <$> o .: "slug"
     <*> o .: "pretty_slug"
+
+
+------------------------------------------------------------------------------
+photoSearchLens :: Lens' PhotoSearchResult [Photo]
+photoSearchLens = lens photoSearchResult_results (\search_result s -> search_result { photoSearchResult_results = s })
+
+resultLens :: Lens' Photo URLs
+resultLens = lens urls ( \res s -> res { urls = s} )
+
+urlLens :: Lens' URLs String
+urlLens = lens full ( \url u -> url { full = u } )
+
+
