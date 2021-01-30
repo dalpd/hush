@@ -6,17 +6,17 @@ module Hush
 
 ------------------------------------------------------------------------------
 
-import Hush.Client (getPhotoSearchResults, getFullLinks)
+import Hush.Client (searchPhotos, getFullLinks)
 import Hush.Utils as HU
 
 ------------------------------------------------------------------------------
   
 main :: IO ()
 main = do
-  key <- HU.accessKey
-  resPhotos <- getPhotoSearchResults "Chess" (Just 10) (Just 2) key
---  resCollections <- getCollectionSearchResults "Views" (Just 10) (Just 2) key
---  resUsers <- getUserSearchResults "Alp" (Just 10) (Just 2) key
+  key <- HU.accessKey "ACCESS_KEY"
+  resPhotos <- searchPhotos (Just $ "Client-ID " <> key) (Just "Korea") (Just 10) (Just 5)
+  --  resCollections <- getCollectionSearchResults "Views" (Just 10) (Just 2) key
+  --  resUsers <- getUserSearchResults "Alp" (Just 10) (Just 2) key
   case resPhotos of
     Left err -> print err
     Right res -> do

@@ -1,46 +1,46 @@
+{-# LANGUAGE DataKinds     #-}
+-- |
 module Hush.Client
-  ( getPhotoSearchResults
-  , getCollectionSearchResults
-  , getUserSearchResults
+  ( searchPhotos
+  , searchCollections
+  , searchUsers
   , getFullLinks
   ) where
 
 ------------------------------------------------------------------------------
 
+import Control.Lens
+import Data.Text (Text)
 import qualified Hush.API as Hush
-import           Hush.Types
-
-import           Control.Lens
-import qualified Data.Text as T
-import           Network.HTTP.Client.TLS (tlsManagerSettings)
-import           Network.HTTP.Client (newManager)
-import           Servant.Client (BaseUrl (..), ClientError, ClientEnv,
-                                 Scheme (Https), mkClientEnv, runClientM)
+import Hush.Types
+import Hush.Utils (defaultEnv)
+import Servant.Client (ClientError, runClientM)
 
 ------------------------------------------------------------------------------
+
 -- | Helper function for searching photos
-getPhotoSearchResults
-  :: T.Text
-  -> Maybe Int -- up to a maximum of 30 items per page
-  -> Maybe Int
-  -> T.Text
+searchPhotos
+  :: Maybe Text
+  -> Maybe Text -- keyword
+  -> Maybe Int -- pp
+  -> Maybe Int --pn
   -> IO (Either ClientError PhotoSearchResult)
-getPhotoSearchResults keyword perPage pageNumber accessKey = do
+searchPhotos authHeader keyword perPage pageNumber = do
   env <- defaultEnv
-  runClientM (api keyword perPage pageNumber accessKey) env
+  runClientM (api authHeader keyword perPage pageNumber) env
   where
-    api q pp pg k = Hush.searchPhotos (Just q) pp pg (Just k)
-
+    api = Hush.searchPhotos
 
 ------------------------------------------------------------------------------
--- | Helper function for searching collections
-getCollectionSearchResults
-  :: T.Text
-  -> Maybe Int -- up to a maximum of 30 items per page
+
+-- | Helper function for searching collections.
+searchCollections
+  :: Text
   -> Maybe Int
-  -> T.Text
+  -> Maybe Int
+  -> Text
   -> IO (Either ClientError CollectionSearchResult)
-getCollectionSearchResults keyword perPage pageNumber accessKey = do
+searchCollections keyword perPage pageNumber accessKey = do
   env <- defaultEnv
   runClientM (api keyword perPage pageNumber accessKey) env
   where
@@ -48,14 +48,15 @@ getCollectionSearchResults keyword perPage pageNumber accessKey = do
 
 
 ------------------------------------------------------------------------------
--- | Helper function for searching users
-getUserSearchResults
-  :: T.Text
-  -> Maybe Int -- up to a maximum of 30 items per page
+
+-- | Helper function for searching users.
+searchUsers
+  :: Text
   -> Maybe Int
-  -> T.Text
+  -> Maybe Int
+  -> Text
   -> IO (Either ClientError UserSearchResult)
-getUserSearchResults keyword perPage pageNumber accessKey = do
+searchUsers keyword perPage pageNumber accessKey = do
   env <- defaultEnv
   runClientM (api keyword perPage pageNumber accessKey) env
   where
@@ -68,14 +69,3 @@ getFullLinks res = do
   let res' = res ^. photoSearchLens
   return $ map (view (resultLens . urlLens)) res'
 
-
-------------------------------------------------------------------------------
-defaultEnv :: IO ClientEnv
-defaultEnv = do
-  manager <- newManager tlsManagerSettings
-  pure $ mkClientEnv manager baseUrl
-
-
-------------------------------------------------------------------------------
-baseUrl :: BaseUrl
-baseUrl = BaseUrl Https "api.unsplash.com" 443 ""

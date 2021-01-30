@@ -1,6 +1,6 @@
 {-# LANGUAGE DataKinds     #-}
 {-# LANGUAGE TypeOperators #-}
-
+-- |
 module Hush.API
   ( searchPhotos
   , searchCollections
@@ -9,69 +9,67 @@ module Hush.API
 
 ------------------------------------------------------------------------------
 
-import           Hush.Types
-
-import qualified Data.Text as T
-import           Data.Proxy
-import           Servant.API
-import           Servant.Client (ClientM, client)
+import Data.Text (Text)
+import Data.Proxy
+import Hush.Types
+import Servant.API
+import Servant.Client (ClientM, client)
 
 ------------------------------------------------------------------------------
+
 -- | TODO:
 -- https://docs.servant.dev/en/stable/cookbook/structuring-apis/StructuringApis.html
 
 type UnsplashAPI = SearchAPI
 
-type SearchAPI =
-    "search" :>
-             ( "photos"
-             :> QueryParam "query" T.Text
-             :> QueryParam "per_page" Int
-             :> QueryParam "page" Int
-             :> QueryParam "client_id" T.Text
-             :> Get '[JSON] PhotoSearchResult
-             :<|> "collections"
-             :> QueryParam "query" T.Text
-             :> QueryParam "per_page" Int
-             :> QueryParam "page" Int
-             :> QueryParam "client_id" T.Text
-             :> Get '[JSON] CollectionSearchResult
-             :<|> "users"
-             :> QueryParam "query" T.Text
-             :> QueryParam "per_page" Int
-             :> QueryParam "page" Int
-             :> QueryParam "client_id" T.Text
-             :> Get '[JSON] UserSearchResult
-             )
+type SearchAPI
+  = "search" :> "photos"
+    :> Header "Authorization" Text
+    :> QueryParam "query" Text
+    :> QueryParam "page" Int
+    :> QueryParam "per_page" Int
+    :> Get '[JSON] PhotoSearchResult
+  :<|> "search" :> "collections"
+    :> QueryParam "query" Text
+    :> QueryParam "page" Int
+    :> QueryParam "per_page" Int
+    :> QueryParam "client_id" Text
+    :> Get '[JSON] CollectionSearchResult
+  :<|> "search" :> "users"
+    :> QueryParam "query" Text
+    :> QueryParam "page" Int
+    :> QueryParam "per_page" Int
+    :> QueryParam "client_id" Text
+    :> Get '[JSON] UserSearchResult
 
 
 ------------------------------------------------------------------------------
-searchAPI :: Proxy SearchAPI
-searchAPI = Proxy
+unsplashAPI :: Proxy UnsplashAPI
+unsplashAPI = Proxy
 
 searchPhotos
-  :: Maybe T.Text
+  :: Maybe Text
+  -> Maybe Text
   -> Maybe Int -- up to a maximum of 30 items per page
   -> Maybe Int
-  -> Maybe T.Text
   -> ClientM PhotoSearchResult
 
 searchCollections
-  :: Maybe T.Text
+  :: Maybe Text
   -> Maybe Int -- up to a maximum of 30 items per page
   -> Maybe Int
-  -> Maybe T.Text
+  -> Maybe Text
   -> ClientM CollectionSearchResult
 
 searchUsers
-  :: Maybe T.Text
+  :: Maybe Text
   -> Maybe Int -- up to a maximum of 30 items per page
   -> Maybe Int
-  -> Maybe T.Text
+  -> Maybe Text
   -> ClientM UserSearchResult
 
 
 ------------------------------------------------------------------------------
-(searchPhotos :<|> searchCollections :<|> searchUsers) = client searchAPI
+(searchPhotos :<|> searchCollections :<|> searchUsers) = client unsplashAPI
 
 

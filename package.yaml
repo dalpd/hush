@@ -25,6 +25,7 @@ library:
     - aeson
     - http-client
     - http-client-tls
+    - lens
     - load-env
     - servant
     - servant-client
