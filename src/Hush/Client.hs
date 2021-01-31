@@ -18,12 +18,12 @@ import Servant.Client (ClientError, runClientM)
 
 ------------------------------------------------------------------------------
 
--- | Helper function for searching photos
+-- | Convenience function to use `Hush.searchPhotos`.
 searchPhotos
   :: Maybe Text
-  -> Maybe Text -- keyword
-  -> Maybe Int -- pp
-  -> Maybe Int --pn
+  -> [Text]
+  -> Maybe Int
+  -> Maybe Int
   -> IO (Either ClientError PhotoSearchResult)
 searchPhotos authHeader keyword perPage pageNumber = do
   env <- defaultEnv
@@ -33,34 +33,34 @@ searchPhotos authHeader keyword perPage pageNumber = do
 
 ------------------------------------------------------------------------------
 
--- | Helper function for searching collections.
+-- | Convenience function to use `Hush.searchCollections`.
 searchCollections
-  :: Text
+  :: Maybe Text
+  -> [Text]
   -> Maybe Int
   -> Maybe Int
-  -> Text
   -> IO (Either ClientError CollectionSearchResult)
-searchCollections keyword perPage pageNumber accessKey = do
+searchCollections authHeader keyword perPage pageNumber = do
   env <- defaultEnv
-  runClientM (api keyword perPage pageNumber accessKey) env
+  runClientM (api authHeader keyword perPage pageNumber) env
   where
-    api q pp pg k = Hush.searchCollections (Just q) pp pg (Just k)
+    api = Hush.searchCollections
 
 
 ------------------------------------------------------------------------------
 
--- | Helper function for searching users.
+-- | Convenience function to use `Hush.searchUsers`.
 searchUsers
-  :: Text
+  :: Maybe Text
+  -> [Text]
   -> Maybe Int
   -> Maybe Int
-  -> Text
   -> IO (Either ClientError UserSearchResult)
-searchUsers keyword perPage pageNumber accessKey = do
+searchUsers authHeader keyword perPage pageNumber = do
   env <- defaultEnv
-  runClientM (api keyword perPage pageNumber accessKey) env
+  runClientM (api authHeader keyword perPage pageNumber) env
   where
-    api q pp pg k = Hush.searchUsers (Just q) pp pg (Just k)
+    api = Hush.searchUsers
 
 
 ------------------------------------------------------------------------------
