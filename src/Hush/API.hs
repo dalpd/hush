@@ -43,7 +43,8 @@ type SearchEndpoint returnType =
 type SearchPhotos =
   "photos" :> AuthHeader
   :> Query :> Page :> PerPage
-  :> OrderBy :> ContentFilterParam :> ColorParam
+  :> OrderByParam :> ContentFilterParam
+  :> ColorParam :> OrientationParam
   :> GetJSON PhotoSearchResult
 
 -- | An endpoint to search collections.
@@ -71,9 +72,10 @@ searchPhotos
   -> Maybe Int
   -> Maybe Int
   -- ^ Number of results per page, up to a maximum of 30 items.
-  -> Maybe Order
+  -> Maybe OrderBy
   -> Maybe ContentFilter
   -> Maybe Color
+  -> Maybe Orientation
   -> ClientM PhotoSearchResult
 
 searchCollections

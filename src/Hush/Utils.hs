@@ -12,12 +12,14 @@ module Hush.Utils
     Query,
     Page,
     PerPage,
-    OrderBy,
+    OrderByParam,
     ContentFilterParam,
     ColorParam,
+    OrientationParam,
     Color (..),
     ContentFilter (..),
-    Order (..),    
+    OrderBy (..),
+    Orientation (..),
         
     -- ^ Servant Client utils
     defaultEnv,
@@ -76,7 +78,7 @@ type PerPage = OptionalQueryParam "per_page" Int
 -- How to sort the photos. (default: relevant).
 -- Valid values are latest and relevant.
 -- * <url>?order_by=latest
-type OrderBy = OptionalQueryParam "order_by" Order
+type OrderByParam = OptionalQueryParam "order_by" OrderBy
 
 -- | Type synonym for "content_filter" parameter.
 -- Limit results by content safety. (default: low).
@@ -91,23 +93,26 @@ type ContentFilterParam = OptionalQueryParam "content_filter" ContentFilter
 -- * <url>?color=orange
 type ColorParam = OptionalQueryParam "color" Color
 
+-- | Type synonym for "orientation" parameter.
+-- Filter by photo orientation. Valid values: landscape, portrait, squarish
+type OrientationParam = OptionalQueryParam "orientation" Orientation
 
 ------------------------------------------------------------------------------
 
--- | Ordering options as used in /search.
-data Order
-  = Order_Relevant
-  | Order_Latest
+-- | Ordering options available.
+data OrderBy
+  = OrderBy_Relevant
+  | OrderBy_Latest
 
 -- | >>> toUrlPiece Order_Relevant
 -- "relevant"
-instance ToHttpApiData Order where
-  toUrlPiece Order_Relevant = "relevant"
-  toUrlPiece Order_Latest = "latest"
+instance ToHttpApiData OrderBy where
+  toUrlPiece OrderBy_Relevant = "relevant"
+  toUrlPiece OrderBy_Latest = "latest"
 
 ------------------------------------------------------------------------------
 
--- | Content filter options.
+-- | Content filter options available.
 data ContentFilter
   = ContentFilter_Low
   | ContentFilter_High
@@ -120,7 +125,7 @@ instance ToHttpApiData ContentFilter where
 
 ------------------------------------------------------------------------------
 
--- | Color type available for "color" parameter.
+-- | Color options available.
 data Color
   = Color_BlackAndWhite
   | Color_Black
@@ -149,7 +154,21 @@ instance ToHttpApiData Color where
   toUrlPiece Color_Teal = "teal"
   toUrlPiece Color_Blue = "blue"
 
-  
+------------------------------------------------------------------------------
+
+-- | Orientation options available.
+data Orientation
+  = Orientation_Landscape
+  | Orientation_Portrait
+  | Orientation_Squarish
+
+-- | >>> toUrlPiece Orientation_Squarish
+-- "squarish"
+instance ToHttpApiData Orientation where
+  toUrlPiece Orientation_Landscape = "landscape"
+  toUrlPiece Orientation_Portrait = "portrait"
+  toUrlPiece Orientation_Squarish = "squarish"
+
 ------------------------------------------------------------------------------
 
 -- | The default `ClientEnv` for Unsplash API.
