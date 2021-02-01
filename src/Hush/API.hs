@@ -38,8 +38,13 @@ type SearchEndpoint returnType =
 -- | An endpoint to search photos.
 -- GET /search/photos
 -- https://unsplash.com/documentation#search-photos
+-- Skipping "collections" query param as it say multiple collection ids are
+-- comma separated and it's extra work.
 type SearchPhotos =
-  "photos" :> SearchEndpoint PhotoSearchResult
+  "photos" :> AuthHeader
+  :> Query :> Page :> PerPage
+  :> OrderBy :> ContentFilterParam :> ColorParam
+  :> GetJSON PhotoSearchResult
 
 -- | An endpoint to search collections.
 -- GET /search/collections
@@ -66,6 +71,9 @@ searchPhotos
   -> Maybe Int
   -> Maybe Int
   -- ^ Number of results per page, up to a maximum of 30 items.
+  -> Maybe Order
+  -> Maybe ContentFilter
+  -> Maybe Color
   -> ClientM PhotoSearchResult
 
 searchCollections

@@ -13,7 +13,7 @@ import Control.Lens
 import Data.Text (Text)
 import qualified Hush.API as Hush
 import Hush.Types
-import Hush.Utils (defaultEnv)
+import Hush.Utils (Color (..), ContentFilter (..), Order (..), defaultEnv)
 import Servant.Client (ClientError, runClientM)
 
 ------------------------------------------------------------------------------
@@ -24,10 +24,13 @@ searchPhotos
   -> [Text]
   -> Maybe Int
   -> Maybe Int
+  -> Maybe Order
+  -> Maybe ContentFilter
+  -> Maybe Color
   -> IO (Either ClientError PhotoSearchResult)
-searchPhotos authHeader keyword perPage pageNumber = do
+searchPhotos authHeader keyword perPage pageNumber orderBy contentFilter color = do
   env <- defaultEnv
-  runClientM (api authHeader keyword perPage pageNumber) env
+  runClientM (api authHeader keyword perPage pageNumber orderBy contentFilter color) env
   where
     api = Hush.searchPhotos
 

@@ -12,7 +12,13 @@ module Hush.Utils
     Query,
     Page,
     PerPage,
-    
+    OrderBy,
+    ContentFilterParam,
+    ColorParam,
+    Color (..),
+    ContentFilter (..),
+    Order (..),    
+        
     -- ^ Servant Client utils
     defaultEnv,
   ) where
@@ -47,19 +53,103 @@ type AuthHeader = Header "Authorization" Text
 
 ------------------------------------------------------------------------------
 
--- | Type synonym for the "query" parameters, e.g. <url>?query=val1&param=val2
+-- | Type synonym for the "query" parameters.
+-- Search terms.
+-- * <url>?query=val1&param=val2
 -- TODO(dalp): Look into how to get `Query` to correspond to `NonEmpty Text`
 -- or just find out if there's a way to assign a mode to `QueryParams` to make
 -- it required therefore making an empty list illegal to use.
 type Query = QueryParams "query" Text
 
--- | Type synonym for the "page" parameter, e.g. <url>?page=2
+-- | Type synonym for the "page" parameter.
+-- Page number to retrieve. (default: 1)
+-- * <url>?page=2
 type Page = OptionalQueryParam "page" Int
 
 -- | Type synonym for the "per_page" parameter, represents the number of items
--- in a page , e.g. <url>?page=2
+-- in a page.
+-- Number of items per page. (default: 10)
+-- * <url>?per_page=2
 type PerPage = OptionalQueryParam "per_page" Int
 
+-- | Type synonym for the "order_by" parameter.
+-- How to sort the photos. (default: relevant).
+-- Valid values are latest and relevant.
+-- * <url>?order_by=latest
+type OrderBy = OptionalQueryParam "order_by" Order
+
+-- | Type synonym for "content_filter" parameter.
+-- Limit results by content safety. (default: low).
+-- Valid values are low and high.
+-- * <url>?content_filter=high
+type ContentFilterParam = OptionalQueryParam "content_filter" ContentFilter
+
+-- | Type synonym for "color" parameter.
+-- Filter results by color. Valid values are:
+-- black_and_white, black, white, yellow, orange, red, purple, magenta, green,
+-- teal, and blue.
+-- * <url>?color=orange
+type ColorParam = OptionalQueryParam "color" Color
+
+
+------------------------------------------------------------------------------
+
+-- | Ordering options as used in /search.
+data Order
+  = Order_Relevant
+  | Order_Latest
+
+-- | >>> toUrlPiece Order_Relevant
+-- "relevant"
+instance ToHttpApiData Order where
+  toUrlPiece Order_Relevant = "relevant"
+  toUrlPiece Order_Latest = "latest"
+
+------------------------------------------------------------------------------
+
+-- | Content filter options.
+data ContentFilter
+  = ContentFilter_Low
+  | ContentFilter_High
+  
+-- | >>> toUrlPiece ContentFilter_Low
+-- "low"
+instance ToHttpApiData ContentFilter where
+  toUrlPiece ContentFilter_Low = "low"
+  toUrlPiece ContentFilter_High = "high"
+
+------------------------------------------------------------------------------
+
+-- | Color type available for "color" parameter.
+data Color
+  = Color_BlackAndWhite
+  | Color_Black
+  | Color_White
+  | Color_Yellow
+  | Color_Orange
+  | Color_Red
+  | Color_Purple
+  | Color_Magenta
+  | Color_Green
+  | Color_Teal
+  | Color_Blue
+
+-- | >>> toUrlPiece Color_Black
+-- "black"
+instance ToHttpApiData Color where
+  toUrlPiece Color_BlackAndWhite = "black_and_white"
+  toUrlPiece Color_Black = "black"
+  toUrlPiece Color_White = "white"
+  toUrlPiece Color_Yellow = "yellow"
+  toUrlPiece Color_Orange = "orange"
+  toUrlPiece Color_Red = "red"
+  toUrlPiece Color_Purple = "purple"
+  toUrlPiece Color_Magenta = "magenta"
+  toUrlPiece Color_Green = "green"
+  toUrlPiece Color_Teal = "teal"
+  toUrlPiece Color_Blue = "blue"
+
+  
 ------------------------------------------------------------------------------
 
 -- | The default `ClientEnv` for Unsplash API.

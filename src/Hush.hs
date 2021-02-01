@@ -14,7 +14,14 @@ import Hush.Utils as HU
 main :: IO ()
 main = do
   key <- HU.accessKey "ACCESS_KEY"
-  resPhotos <- searchPhotos (Just $ "Client-ID " <> key) (["Korea"]) (Just 10) (Just 5)
+  resPhotos <-
+    searchPhotos
+      (Just $ "Client-ID " <> key)
+      (["Korea"])
+      (Just 10)
+      (Just 5)
+      (Just Order_Relevant)
+      (Just ContentFilter_Low) Nothing
   --  resCollections <- getCollectionSearchResults "Views" (Just 10) (Just 2) key
   --  resUsers <- getUserSearchResults "Alp" (Just 10) (Just 2) key
   case resPhotos of
