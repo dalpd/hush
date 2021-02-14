@@ -1,10 +1,9 @@
 {-# LANGUAGE DataKinds     #-}
 -- | Module for shared utility functions needed by hush.
 module Hush.Utils
-  ( -- ^ Misc functions for hush
-    accessKey,
-
-    -- ^ Servant API utils
+  ( accessKey,
+    defaultEnv,
+    
     GetJSON,
     OptionalQueryParam,
     RequiredQueryParam,
@@ -19,10 +18,7 @@ module Hush.Utils
     Color (..),
     ContentFilter (..),
     OrderBy (..),
-    Orientation (..),
-        
-    -- ^ Servant Client utils
-    defaultEnv,
+    Orientation (..),       
   ) where
 
 ------------------------------------------------------------------------------

@@ -9,7 +9,6 @@ default-extensions:
   - RecordWildCards
   - LambdaCase
 extra-source-files:
-  - CHANGELOG.md
   - README.md
 
 ghc-options:
