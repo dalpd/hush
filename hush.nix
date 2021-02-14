@@ -1,6 +1,6 @@
 { mkDerivation, base, ghcid, nixfmt, stdenv, zlib }:
 mkDerivation {
-  pname = "scully";
+  pname = "hush";
   version = "0.1.0.0";
   src = ./.;
   isLibrary = true;
